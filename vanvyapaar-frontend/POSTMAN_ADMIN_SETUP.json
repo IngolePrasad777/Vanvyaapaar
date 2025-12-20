@@ -1,0 +1,125 @@
+{
+  "info": {
+    "name": "VanVyaapaar - Admin Setup",
+    "description": "Postman collection for creating and testing admin account",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Admin (Direct DB Insert)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "-- Use this SQL query directly in your database\n-- This is NOT a REST endpoint, run this in your MySQL/PostgreSQL client\n\nINSERT INTO basetable (name, email, password, confirm_password, phone, address, pincode, created_at)\nVALUES (\n  'Admin User',\n  'admin@vanvyaapaar.com',\n  'admin123',\n  'admin123',\n  '9876543210',\n  'Admin Office, Delhi',\n  '110001',\n  NOW()\n);\n\n-- Get the ID of the inserted record\nSET @admin_id = LAST_INSERT_ID();\n\n-- Insert into admins table\nINSERT INTO admins (user_id)\nVALUES (@admin_id);\n\n-- Verify the admin was created\nSELECT b.*, a.user_id \nFROM basetable b \nJOIN admins a ON b.id = a.user_id \nWHERE b.email = 'admin@vanvyaapaar.com';"
+        },
+        "url": {
+          "raw": "N/A - Run SQL directly in database",
+          "host": ["N/A"]
+        },
+        "description": "Since there's no admin signup endpoint, you need to insert admin directly into the database using SQL."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Login as Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@vanvyaapaar.com\",\n  \"password\": \"admin123\",\n  \"role\": \"ADMIN\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["auth", "login"]
+        },
+        "description": "Login with admin credentials. Returns JWT token."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get Dashboard Metrics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "description": "JWT token from login response"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/admin/dashboard/metrics",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["admin", "dashboard", "metrics"]
+        },
+        "description": "Get admin dashboard metrics (total sellers, buyers, products, orders, revenue)"
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get All Sellers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/admin/sellers",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["admin", "sellers"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get All Buyers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/admin/buyers",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["admin", "buyers"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "admin_token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ]
+}

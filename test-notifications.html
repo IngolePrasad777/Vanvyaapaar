@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Notifications</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔔 Notification System Test</h1>
+        <p>Test the notification system by creating test notifications for different user roles.</p>
+
+        <div style="margin-bottom: 30px;">
+            <h2>📧 Quick Email Test</h2>
+            <p>Test your email configuration quickly:</p>
+            <div class="form-group">
+                <label for="testEmail">Your Email Address:</label>
+                <input type="email" id="testEmail" placeholder="your-email@gmail.com" required>
+            </div>
+            <button type="button" onclick="sendTestEmail()" style="background: #FF6B35; margin-bottom: 20px;">
+                📧 Send Test Email
+            </button>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h2>🔍 Backend Status Check</h2>
+            <p>First, let's check if the backend is running and accessible:</p>
+            <button type="button" onclick="checkBackendHealth()">Check Backend Health</button>
+            <div id="healthResult" style="margin-top: 10px;"></div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h2>🧪 Business Event Testing</h2>
+            <p>Test notifications triggered by actual business events:</p>
+            <button type="button" onclick="testOrderStatusUpdate()">Test Order Status Update</button>
+            <button type="button" onclick="testSellerRegistration()">Test Seller Registration</button>
+            <button type="button" onclick="testSellerApproval()">Test Seller Approval</button>
+            <button type="button" onclick="testPaymentSuccess()">Test Payment Success</button>
+            <button type="button" onclick="testPaymentFailure()">Test Payment Failure</button>
+        </div>
+
+        <h2>📝 Manual Notification Creation</h2>
+        <form id="notificationForm">
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="number" id="userId" value="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userRole">User Role:</label>
+                <select id="userRole" required>
+                    <option value="BUYER">Buyer</option>
+                    <option value="SELLER">Seller</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Notification Type:</label>
+                <select id="type" required>
+                    <option value="ORDER_PLACED">Order Placed</option>
+                    <option value="ORDER_CONFIRMED">Order Confirmed</option>
+                    <option value="ORDER_SHIPPED">Order Shipped</option>
+                    <option value="ORDER_DELIVERED">Order Delivered</option>
+                    <option value="ORDER_CANCELLED">Order Cancelled</option>
+                    <option value="PAYMENT_SUCCESS">Payment Success</option>
+                    <option value="PAYMENT_FAILED">Payment Failed</option>
+                    <option value="PRODUCT_APPROVED">Product Approved</option>
+                    <option value="PRODUCT_REJECTED">Product Rejected</option>
+                    <option value="LOW_STOCK">Low Stock Alert</option>
+                    <option value="ACCOUNT_APPROVED">Account Approved</option>
+                    <option value="ACCOUNT_SUSPENDED">Account Suspended</option>
+                    <option value="NEW_SELLER">New Seller Registration</option>
+                    <option value="NEW_COMPLAINT">New Complaint</option>
+                    <option value="REVIEW_ADDED">Review Added</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" value="Test Notification" required>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" rows="3"
+                    required>This is a test notification to verify the notification system is working correctly.</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority:</label>
+                <select id="priority">
+                    <option value="LOW">Low</option>
+                    <option value="NORMAL" selected>Normal</option>
+                    <option value="HIGH">High</option>
+                    <option value="URGENT">Urgent</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="sendEmail"> Send Email Notification
+                </label>
+            </div>
+
+            <button type="submit">Create Test Notification</button>
+            <button type="button" onclick="fetchNotifications()">Fetch Notifications</button>
+            <button type="button" onclick="getUnreadCount()">Get Unread Count</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                userId: parseInt(document.getElementById('userId').value),
+                userRole: document.getElementById('userRole').value,
+                type: document.getElementById('type').value,
+                title: document.getElementById('title').value,
+                message: document.getElementById('message').value,
+                priority: document.getElementById('priority').value,
+                sendEmail: document.getElementById('sendEmail').checked
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showResult('✅ Notification created successfully!', 'success');
+                    console.log('Created notification:', result);
+                } else {
+                    showResult('❌ Error creating notification: ' + (result.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showResult('❌ Network error: ' + error.message, 'error');
+            }
+        });
+
+        async function fetchNotifications() {
+            const userId = document.getElementById('userId').value;
+            const userRole = document.getElementById('userRole').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications/${userId}/${userRole}`);
+                const notifications = await response.json();
+
+                if (response.ok) {
+                    showResult(`📋 Found ${notifications.length} notifications`, 'success');
+                    console.log('Notifications:', notifications);
+                } else {
+                    showResult('❌ Error fetching notifications', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function getUnreadCount() {
+            const userId = document.getElementById('userId').value;
+            const userRole = document.getElementById('userRole').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications/${userId}/${userRole}/count`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    showResult(`🔔 Unread notifications: ${result.count}`, 'success');
+                } else {
+                    showResult('❌ Error getting unread count', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Network error: ' + error.message, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Email testing function
+        async function sendTestEmail() {
+            const email = document.getElementById('testEmail').value;
+            if (!email) {
+                showResult('❌ Please enter your email address', 'error');
+                return;
+            }
+
+            try {
+                showResult('📧 Sending test email...', 'success');
+                const response = await fetch(`${API_BASE}/notifications/test-email?email=${encodeURIComponent(email)}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success === 'true') {
+                    showResult(`✅ Test email sent successfully to ${email}! Check your inbox (and spam folder).`, 'success');
+                } else {
+                    showResult(`❌ Failed to send test email: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Network error: ' + error.message, 'error');
+            }
+        }
+
+        // Backend health check
+        async function checkBackendHealth() {
+            const healthDiv = document.getElementById('healthResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications/health`, {
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    healthDiv.innerHTML = `<div class="success">✅ Backend is running! Status: ${result.status} at ${result.timestamp}</div>`;
+                } else {
+                    healthDiv.innerHTML = `<div class="error">❌ Backend responded with error: ${response.status} - ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                healthDiv.innerHTML = `<div class="error">❌ Cannot connect to backend: ${error.message}<br>
+                    <small>Try opening this URL directly in browser: <a href="${API_BASE}/notifications/health" target="_blank">${API_BASE}/notifications/health</a></small></div>`;
+            }
+        }
+
+        // Business event testing functions
+        async function testOrderStatusUpdate() {
+            try {
+                // Simulate the notification that would be created when seller updates order status
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 1,
+                        userRole: 'BUYER',
+                        type: 'ORDER_SHIPPED',
+                        title: 'Order Shipped',
+                        message: 'Your order #1001 has been shipped and is on its way!',
+                        priority: 'NORMAL',
+                        sendEmail: true
+                    })
+                });
+
+                if (response.ok) {
+                    showResult('✅ Order status notification created! Buyer will be notified when order is shipped.', 'success');
+                } else {
+                    showResult('❌ Failed to create order status notification', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testSellerRegistration() {
+            try {
+                // Simulate the notification that would be created when new seller registers
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 1,
+                        userRole: 'ADMIN',
+                        type: 'NEW_SELLER',
+                        title: 'New Seller Registration',
+                        message: 'New seller "Rajesh Kumar" has registered and needs approval.',
+                        priority: 'HIGH',
+                        sendEmail: false
+                    })
+                });
+
+                if (response.ok) {
+                    showResult('✅ Seller registration notification created! Admin will be notified of new registrations.', 'success');
+                } else {
+                    showResult('❌ Failed to create seller registration notification', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testSellerApproval() {
+            try {
+                // Simulate the notification that would be created when admin approves seller
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 2,
+                        userRole: 'SELLER',
+                        type: 'ACCOUNT_APPROVED',
+                        title: 'Account Approved',
+                        message: 'Congratulations! Your seller account has been approved. You can now start selling.',
+                        priority: 'HIGH',
+                        sendEmail: true
+                    })
+                });
+
+                if (response.ok) {
+                    showResult('✅ Seller approval notification created! Sellers will be notified when approved.', 'success');
+                } else {
+                    showResult('❌ Failed to create seller approval notification', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testPaymentSuccess() {
+            try {
+                // Simulate the notification that would be created when payment succeeds
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 1,
+                        userRole: 'BUYER',
+                        type: 'PAYMENT_SUCCESS',
+                        title: 'Payment Successful',
+                        message: 'Your payment of ₹2,499 was processed successfully for order #1001.',
+                        priority: 'NORMAL',
+                        sendEmail: true
+                    })
+                });
+
+                if (response.ok) {
+                    showResult('✅ Payment success notification created! Buyers will be notified of successful payments.', 'success');
+                } else {
+                    showResult('❌ Failed to create payment success notification', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testPaymentFailure() {
+            try {
+                // Simulate the notification that would be created when payment fails
+                const response = await fetch(`${API_BASE}/notifications/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 1,
+                        userRole: 'BUYER',
+                        type: 'PAYMENT_FAILED',
+                        title: 'Payment Failed',
+                        message: 'Your payment of ₹2,499 failed. Please try again or contact support.',
+                        priority: 'HIGH',
+                        sendEmail: true
+                    })
+                });
+
+                if (response.ok) {
+                    showResult('✅ Payment failure notification created! Buyers will be notified of failed payments.', 'success');
+                } else {
+                    showResult('❌ Failed to create payment failure notification', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Update form based on user role selection
+        document.getElementById('userRole').addEventListener('change', (e) => {
+            const role = e.target.value;
+            const typeSelect = document.getElementById('type');
+            const titleInput = document.getElementById('title');
+            const messageInput = document.getElementById('message');
+
+            // Update default values based on role
+            if (role === 'BUYER') {
+                typeSelect.value = 'ORDER_PLACED';
+                titleInput.value = 'Order Confirmation';
+                messageInput.value = 'Your order has been placed successfully and is being processed.';
+            } else if (role === 'SELLER') {
+                typeSelect.value = 'PRODUCT_APPROVED';
+                titleInput.value = 'Product Approved';
+                messageInput.value = 'Your product has been approved and is now live on the marketplace.';
+            } else if (role === 'ADMIN') {
+                typeSelect.value = 'NEW_SELLER';
+                titleInput.value = 'New Seller Registration';
+                messageInput.value = 'A new seller has registered and requires approval.';
+            }
+        });
+    </script>
+</body>
+
+</html>

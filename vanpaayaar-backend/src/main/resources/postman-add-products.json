@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "VanVyapaar - Add Sample Products",
+    "description": "Collection to add sample tribal craft products via API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Wood Crafts",
+      "item": [
+        {
+          "name": "Add Wooden Bowl",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Handcrafted Wooden Bowl\",\n  \"description\": \"Beautiful hand-carved wooden bowl made from sustainable teak wood. Perfect for serving fruits or as decorative piece. Each piece is unique with natural wood grain patterns.\",\n  \"category\": \"Wood Crafts\",\n  \"price\": 1299.00,\n  \"stock\": 25,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800\",\n  \"featured\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/seller/3/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["seller", "3", "products"]
+            }
+          }
+        },
+        {
+          "name": "Add Tribal Wooden Mask",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tribal Wooden Mask\",\n  \"description\": \"Traditional tribal mask hand-carved by skilled artisans. Features intricate designs representing ancient tribal symbols. Made from premium hardwood with natural finish.\",\n  \"category\": \"Wood Crafts\",\n  \"price\": 2499.00,\n  \"stock\": 15,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1582747652673-603191169c49?w=800\",\n  \"featured\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/seller/3/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["seller", "3", "products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Handicrafts",
+      "item": [
+        {
+          "name": "Add Bamboo Basket Set",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bamboo Basket Set\",\n  \"description\": \"Set of 3 handwoven bamboo baskets in different sizes. Eco-friendly and durable. Perfect for storage or home decoration. Made using traditional weaving techniques.\",\n  \"category\": \"Handicrafts\",\n  \"price\": 899.00,\n  \"stock\": 40,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1590736969955-71cc94901144?w=800\",\n  \"featured\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/seller/3/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["seller", "3", "products"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

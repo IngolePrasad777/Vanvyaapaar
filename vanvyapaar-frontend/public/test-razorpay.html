@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Test Mode Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #10B981;
+        }
+
+        button {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🧪 Razorpay Test Mode Verification</h1>
+
+        <div class="info">
+            <strong>✅ Indian Test Cards (Use These):</strong><br>
+            <strong>Success Card:</strong> <code>5267 3181 8797 5449</code> (Mastercard)<br>
+            <strong>Alternative:</strong> <code>4111 1111 1111 1111</code> (Visa - may fail if international
+            disabled)<br>
+            CVV: <code>123</code> (any 3 digits)<br>
+            Expiry: Any future date (e.g., 12/25)<br>
+            OTP: <code>111111</code>
+        </div>
+
+        <div class="info warning">
+            <strong>⚠️ If "International cards not supported" error:</strong><br>
+            Your Razorpay test account has international payments disabled.<br>
+            Use the Mastercard above or enable international in Razorpay Dashboard.
+        </div>
+
+        <div class="info">
+            <strong>📋 Prerequisites:</strong><br>
+            ✅ Backend running on <code>http://localhost:8080</code><br>
+            ✅ Buyer with ID 5 exists in database<br>
+            ✅ MySQL database is running
+        </div>
+
+        <button onclick="testRazorpayLoad()">1. Test Script Load</button>
+        <button onclick="testPayment()">2. Test Payment (₹100)</button>
+        <button onclick="clearCache()">3. Clear Cache & Reload</button>
+
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        const TEST_KEY = 'rzp_test_RnWTeFkA7utkL8';
+
+        function log(message, type = 'info') {
+            const result = document.getElementById('result');
+            const div = document.createElement('div');
+            div.className = `info ${type}`;
+            div.innerHTML = message;
+            result.appendChild(div);
+        }
+
+        function testRazorpayLoad() {
+            document.getElementById('result').innerHTML = '';
+            log('🔄 Loading Razorpay script...', 'info');
+
+            // Remove existing script
+            const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+            if (existing) {
+                existing.remove();
+                delete window.Razorpay;
+                log('🗑️ Removed existing script', 'warning');
+            }
+
+            // Load fresh script with cache buster
+            const script = document.createElement('script');
+            script.src = `https://checkout.razorpay.com/v1/checkout.js?t=${Date.now()}`;
+            script.async = true;
+
+            script.onload = () => {
+                log('✅ Razorpay script loaded successfully!', 'success');
+                log(`🔑 Using TEST key: ${TEST_KEY}`, 'info');
+
+                if (window.Razorpay) {
+                    log('✅ window.Razorpay is available', 'success');
+                } else {
+                    log('❌ window.Razorpay is NOT available', 'error');
+                }
+            };
+
+            script.onerror = () => {
+                log('❌ Failed to load Razorpay script', 'error');
+            };
+
+            document.body.appendChild(script);
+        }
+
+        async function testPayment() {
+            document.getElementById('result').innerHTML = '';
+
+            if (!window.Razorpay) {
+                log('❌ Razorpay not loaded. Click "Test Script Load" first.', 'error');
+                return;
+            }
+
+            log('🚀 Creating order with backend...', 'info');
+
+            try {
+                // Create order via backend API
+                const response = await fetch('http://localhost:8080/payment/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        buyerId: 5, // Test buyer ID
+                        amount: 100, // ₹100
+                        currency: 'INR'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create order');
+                }
+
+                const orderData = await response.json();
+
+                if (!orderData.success) {
+                    throw new Error(orderData.message || 'Order creation failed');
+                }
+
+                log('✅ Order created successfully!', 'success');
+                log(`📝 Order ID: ${orderData.orderId}`, 'info');
+                log(`🔑 Key: ${orderData.keyId}`, 'info');
+                log(`💰 Amount: ₹${orderData.amount / 100}`, 'info');
+
+                // Verify TEST key
+                if (!orderData.keyId.startsWith('rzp_test_')) {
+                    log('⚠️ WARNING: Not using TEST key!', 'error');
+                    return;
+                }
+
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    order_id: orderData.orderId, // IMPORTANT: Order ID from backend
+                    name: 'VanVyaapaar Test',
+                    description: 'Test Payment',
+                    handler: function (response) {
+                        log('✅ PAYMENT SUCCESS!', 'success');
+                        log(`<pre>${JSON.stringify(response, null, 2)}</pre>`, 'success');
+                        log('🎉 You can now use this in your app!', 'success');
+                    },
+                    prefill: {
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        contact: '9999999999'
+                    },
+                    theme: {
+                        color: '#10B981'
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            log('⚠️ Payment cancelled by user', 'warning');
+                        }
+                    }
+                };
+
+                const rzp = new window.Razorpay(options);
+
+                rzp.on('payment.failed', function (response) {
+                    log('❌ PAYMENT FAILED', 'error');
+                    log(`<pre>${JSON.stringify(response.error, null, 2)}</pre>`, 'error');
+                });
+
+                rzp.open();
+                log('✅ Payment modal opened', 'success');
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                log('💡 Make sure backend is running on http://localhost:8080', 'warning');
+            }
+        }
+
+        function clearCache() {
+            log('🧹 Clearing cache and reloading...', 'info');
+
+            // Clear localStorage
+            localStorage.clear();
+
+            // Clear sessionStorage
+            sessionStorage.clear();
+
+            // Remove Razorpay script
+            const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+            if (existing) {
+                existing.remove();
+            }
+
+            setTimeout(() => {
+                location.reload(true);
+            }, 1000);
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            log('📄 Page loaded. Click "Test Script Load" to begin.', 'info');
+        });
+    </script>
+</body>
+
+</html>

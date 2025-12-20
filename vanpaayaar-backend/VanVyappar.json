@@ -1,0 +1,438 @@
+{
+    "info": {
+      "name": "VanVyaapaar API - Full",
+      "_postman_id": "d4f2b2bc-31a1-49d8-beca-vanvyaapaar",
+      "description": "Auth (JWT) + Buyer + Seller + Admin (metrics)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      { "key": "baseUrl", "value": "http://localhost:8080" },
+      { "key": "email", "value": "buyer@example.com" },
+      { "key": "password", "value": "buyer123" },
+      { "key": "role", "value": "BUYER" },
+      { "key": "token", "value": "" },
+      { "key": "buyerId", "value": "1" },
+      { "key": "sellerId", "value": "1" },
+      { "key": "adminEmail", "value": "admin@example.com" },
+      { "key": "adminPassword", "value": "admin123" },
+      { "key": "productId", "value": "1" },
+      { "key": "cartItemId", "value": "1" },
+      { "key": "quantity", "value": "1" },
+      { "key": "updateQuantity", "value": "2" },
+      { "key": "keyword", "value": "handicraft" },
+      { "key": "category", "value": "Home" },
+      { "key": "minPrice", "value": "100" },
+      { "key": "maxPrice", "value": "1000" },
+      { "key": "orderId", "value": "1" },
+      { "key": "orderStatus", "value": "DISPATCHED" }
+    ],
+    "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Signup Buyer",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signup/buyer",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "signup", "buyer"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Buyer Name\",\n  \"email\": \"buyer@example.com\",\n  \"password\": \"buyer123\",\n  \"confirmPassword\": \"buyer123\",\n  \"phone\": \"9999999999\",\n  \"address\": \"Buyer Address\",\n  \"pincode\": \"123456\"\n}"
+                },
+                "description": "Registers a new Buyer account."
+              }
+            },
+            {
+              "name": "Signup Seller",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/signup/seller",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "signup", "seller"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Seller Name\",\n  \"email\": \"seller@example.com\",\n  \"password\": \"seller123\",\n  \"confirmPassword\": \"seller123\",\n  \"phone\": \"8888888888\",\n  \"address\": \"Seller Address\",\n  \"pincode\": \"654321\",\n  \"tribeName\": \"Gond\",\n  \"artisanCategory\": \"Handicrafts\",\n  \"region\": \"MP\",\n  \"bio\": \"Short bio\",\n  \"bankAccountNumber\": \"123456789012\",\n  \"ifscCode\": \"HDFC0001234\",\n  \"panNumber\": \"ABCDE1234F\",\n  \"termsAccepted\": true,\n  \"consentAccepted\": true\n}"
+                },
+                "description": "Registers a new Seller account."
+              }
+            },
+            {
+              "name": "Login (ADMIN/BUYER/SELLER)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"role\": \"{{role}}\"\n}"
+                },
+                "description": "Set role as ADMIN, BUYER, or SELLER. Copy response.token to {{token}}."
+              }
+            }
+          ]
+        },
+      {
+        "name": "Buyer - Products",
+        "item": [
+          {
+            "name": "Get All Products",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/products",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "products"]
+              }
+            }
+          },
+          {
+            "name": "Get Product by ID",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/products/{{productId}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "products", "{{productId}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Cart",
+        "item": [
+          {
+            "name": "Add to Cart",
+            "request": {
+              "method": "POST",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/cart/add/{{productId}}?quantity={{quantity}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "cart", "add", "{{productId}}"],
+                "query": [{ "key": "quantity", "value": "{{quantity}}" }]
+              }
+            }
+          },
+          {
+            "name": "Get Cart",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/cart",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "cart"]
+              }
+            }
+          },
+          {
+            "name": "Update Cart Item",
+            "request": {
+              "method": "PUT",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/cart/{{cartItemId}}?quantity={{updateQuantity}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "cart", "{{cartItemId}}"],
+                "query": [{ "key": "quantity", "value": "{{updateQuantity}}" }]
+              }
+            }
+          },
+          {
+            "name": "Remove Cart Item",
+            "request": {
+              "method": "DELETE",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/cart/{{cartItemId}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "cart", "{{cartItemId}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Orders",
+        "item": [
+          {
+            "name": "Place Order",
+            "request": {
+              "method": "POST",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/orders",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "orders"]
+              }
+            }
+          },
+          {
+            "name": "Get Orders",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/orders",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "orders"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Reviews",
+        "item": [
+          {
+            "name": "Add Review",
+            "request": {
+              "method": "POST",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" },
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/reviews",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "reviews"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"buyerId\": {{buyerId}},\n  \"productId\": {{productId}},\n  \"rating\": 5,\n  \"comment\": \"Great product!\"\n}"
+              }
+            }
+          },
+          {
+            "name": "Get Product Reviews",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/products/{{productId}}/reviews",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "products", "{{productId}}", "reviews"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Wishlist",
+        "item": [
+          {
+            "name": "Add to Wishlist",
+            "request": {
+              "method": "POST",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/wishlist/{{productId}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "wishlist", "{{productId}}"]
+              }
+            }
+          },
+          {
+            "name": "Get Wishlist",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/wishlist",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "wishlist"]
+              }
+            }
+          },
+          {
+            "name": "Remove from Wishlist",
+            "request": {
+              "method": "DELETE",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/wishlist/{{productId}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "wishlist", "{{productId}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Profile",
+        "item": [
+          {
+            "name": "Get Profile",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/profile",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "profile"]
+              }
+            }
+          },
+          {
+            "name": "Update Profile",
+            "request": {
+              "method": "PUT",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" },
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/{{buyerId}}/profile",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "{{buyerId}}", "profile"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"9999999999\"\n}"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Buyer - Search & Filter",
+        "item": [
+          {
+            "name": "Search Products (keyword)",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/search?keyword={{keyword}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "search"],
+                "query": [{ "key": "keyword", "value": "{{keyword}}" }]
+              }
+            }
+          },
+          {
+            "name": "Filter Products (category)",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/filter/category?category={{category}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "filter", "category"],
+                "query": [{ "key": "category", "value": "{{category}}" }]
+              }
+            }
+          },
+          {
+            "name": "Filter Products (price)",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/buyer/filter/price?min={{minPrice}}&max={{maxPrice}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["buyer", "filter", "price"],
+                "query": [
+                  { "key": "min", "value": "{{minPrice}}" },
+                  { "key": "max", "value": "{{maxPrice}}" }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Seller - Orders",
+        "item": [
+          {
+            "name": "Get Orders by Seller",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/seller/{{sellerId}}/orders",
+                "host": ["{{baseUrl}}"],
+                "path": ["seller", "{{sellerId}}", "orders"]
+              }
+            }
+          },
+          {
+            "name": "Update Order Status",
+            "request": {
+              "method": "PUT",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/seller/orders/{{orderId}}/status?status={{orderStatus}}",
+                "host": ["{{baseUrl}}"],
+                "path": ["seller", "orders", "{{orderId}}", "status"],
+                "query": [{ "key": "status", "value": "{{orderStatus}}" }]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Seller - Dashboard & Notifications",
+        "item": [
+          {
+            "name": "Dashboard Metrics",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/seller/{{sellerId}}/dashboard",
+                "host": ["{{baseUrl}}"],
+                "path": ["seller", "{{sellerId}}", "dashboard"]
+              }
+            }
+          },
+          {
+            "name": "Notifications",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/seller/{{sellerId}}/notifications",
+                "host": ["{{baseUrl}}"],
+                "path": ["seller", "{{sellerId}}", "notifications"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Admin - Dashboard",
+        "item": [
+          {
+            "name": "Admin Dashboard Metrics",
+            "request": {
+              "method": "GET",
+              "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+              "url": {
+                "raw": "{{baseUrl}}/admin/dashboard/metrics",
+                "host": ["{{baseUrl}}"],
+                "path": ["admin", "dashboard", "metrics"]
+              },
+              "description": "Requires Auth with ADMIN role"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  

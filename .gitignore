@@ -1,0 +1,19 @@
+# OS / IDE
+.vscode/
+.DS_Store
+
+# Java / Spring Boot
+target/
+*.log
+
+# Node / React
+node_modules/
+build/
+dist/
+
+# Env files
+.env
+
+# Misc
+*.class
+
