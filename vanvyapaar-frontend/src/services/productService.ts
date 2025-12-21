@@ -2,7 +2,18 @@ import api from '../lib/api'
 import { Product, ProductFilters } from '../types'
 
 export const productService = {
-  // Public product endpoints
+  // Public product endpoints (no authentication required)
+  getPublicProducts: async (): Promise<Product[]> => {
+    const response = await api.get('/public/products')
+    return response.data
+  },
+
+  getPublicProduct: async (id: number): Promise<Product> => {
+    const response = await api.get(`/public/products/${id}`)
+    return response.data
+  },
+
+  // Authenticated product endpoints
   getAllProducts: async (): Promise<Product[]> => {
     const response = await api.get('/buyer/products')
     return response.data

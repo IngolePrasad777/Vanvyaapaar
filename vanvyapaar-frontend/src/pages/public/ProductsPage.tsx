@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Container, Box, Typography, TextField, InputAdornment, Button,
@@ -14,7 +14,10 @@ import {
 } from '@mui/icons-material'
 import { Product } from '../../types'
 import productService from '../../services/productService'
+import { useAuthStore } from '../../store/authStore'
+import { useCartStore } from '../../store/cartStore'
 import { formatPrice, debounce } from '../../lib/utils'
+import toast from 'react-hot-toast'
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -30,6 +33,31 @@ const ProductsPage = () => {
     maxPrice: '',
     sortBy: 'name'
   })
+
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuthStore()
+  const { addToCart } = useCartStore()
+
+  const handleAddToCart = async (product: Product) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Please login or register to add items to cart')
+      navigate('/login')
+      return
+    }
+
+    if (user.role !== 'BUYER') {
+      toast.error('Only buyers can add items to cart')
+      return
+    }
+
+    try {
+      await addToCart(user.id, product.id, 1)
+      toast.success(`${product.name} added to cart!`)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      toast.error('Failed to add item to cart')
+    }
+  }
 
   const toggleFavorite = (productId: string) => {
     setFavorites(prev => {
@@ -84,7 +112,7 @@ const ProductsPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const data = await productService.getAllProducts()
+      const data = await productService.getPublicProducts()
       setProducts(data)
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -926,6 +954,8 @@ const ProductsPage = () => {
                     isFavorite={favorites.has(String(product.id))}
                     onToggleFavorite={() => toggleFavorite(String(product.id))}
                     index={index}
+                    isAuthenticated={isAuthenticated}
+                    onAddToCart={handleAddToCart}
                   />
                 ))}
               </Box>
@@ -943,9 +973,11 @@ interface ProductCardProps {
   isFavorite: boolean
   onToggleFavorite: () => void
   index: number
+  isAuthenticated: boolean
+  onAddToCart: (product: Product) => void
 }
 
-const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }: ProductCardProps) => {
+const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index, isAuthenticated, onAddToCart }: ProductCardProps) => {
   if (viewMode === 'list') {
     return (
       <motion.div
@@ -1074,6 +1106,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
                   <Button
                     variant="contained"
                     startIcon={<ShoppingCart />}
+                    onClick={() => onAddToCart(product)}
                     sx={{
                       bgcolor: '#D4A574',
                       borderRadius: 2,
@@ -1084,7 +1117,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
                       }
                     }}
                   >
-                    Add to Cart
+                    {isAuthenticated ? 'Add to Cart' : 'Login to Buy'}
                   </Button>
                 </Stack>
               </Stack>
@@ -1218,7 +1251,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
             startIcon={<Add />}
             onClick={(e) => {
               e.preventDefault()
-              // Add to cart logic
+              onAddToCart(product)
             }}
             sx={{
               position: 'absolute',
@@ -1240,7 +1273,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
               }
             }}
           >
-            Quick Add
+            {isAuthenticated ? 'Quick Add' : 'Login to Buy'}
           </Button>
         </Box>
 
@@ -1295,6 +1328,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
               fullWidth
               variant="contained"
               startIcon={<ShoppingCart />}
+              onClick={() => onAddToCart(product)}
               sx={{
                 bgcolor: '#D4A574',
                 borderRadius: 3,
@@ -1305,7 +1339,7 @@ const ProductCard = ({ product, viewMode, isFavorite, onToggleFavorite, index }:
                 }
               }}
             >
-              Add to Cart
+              {isAuthenticated ? 'Add to Cart' : 'Login to Buy'}
             </Button>
             <IconButton
               onClick={onToggleFavorite}

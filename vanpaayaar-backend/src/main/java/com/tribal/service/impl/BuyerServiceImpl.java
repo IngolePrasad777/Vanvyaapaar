@@ -3,6 +3,7 @@ package com.tribal.service.impl;
 import com.tribal.model.*;
 import com.tribal.repository.*;
 import com.tribal.service.BuyerService;
+import com.tribal.service.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,19 +19,22 @@ public class BuyerServiceImpl implements BuyerService {
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
     private final WishlistRepository wishlistRepository;
+    private final NotificationService notificationService;
 
     public BuyerServiceImpl(ProductRepository productRepository,
                             BuyerRepository buyerRepository,
                             CartRepository cartRepository,
                             OrderRepository orderRepository,
                             ReviewRepository reviewRepository,
-                            WishlistRepository wishlistRepository) {
+                            WishlistRepository wishlistRepository,
+                            NotificationService notificationService) {
         this.productRepository = productRepository;
         this.buyerRepository = buyerRepository;
         this.cartRepository = cartRepository;
         this.reviewRepository = reviewRepository;
         this.wishlistRepository = wishlistRepository;
         this.orderRepository = orderRepository;
+        this.notificationService = notificationService;
     }
 
     // --------------------- Products ---------------------
@@ -133,8 +137,35 @@ public class BuyerServiceImpl implements BuyerService {
                 if (product.getStock() != null && product.getStock() >= item.getQuantity()) {
                     product.setStock(product.getStock() - item.getQuantity());
                     productRepository.save(product);
+                    
+                    // Check for low stock and notify seller
+                    if (product.getStock() <= 5) {
+                        notificationService.notifyLowStock(
+                            seller.getId(), 
+                            product.getId(), 
+                            product.getName(), 
+                            product.getStock()
+                        );
+                    }
                 }
             }
+            
+            // Create notifications for order placement
+            // Notify buyer (with email)
+            notificationService.notifyOrderPlaced(
+                buyer.getId(), 
+                order.getId(), 
+                String.format("Order contains %d items worth ₹%.2f", items.size(), total)
+            );
+            
+            // Notify seller (with email)
+            notificationService.notifySellerNewOrder(
+                seller.getId(), 
+                order.getId(), 
+                String.format("New order from %s containing %d items worth ₹%.2f", 
+                    buyer.getName(), items.size(), total)
+            );
+            
             created.add(order);
         }
         return created;
@@ -159,7 +190,34 @@ public class BuyerServiceImpl implements BuyerService {
                 .rating(rating)
                 .comment(comment)
                 .build();
-        return reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(review);
+        
+        // Notify seller about new review
+        try {
+            if (product.getSeller() != null && product.getSeller().getId() != null) {
+                String stars = "⭐".repeat(rating);
+                System.out.println("Creating review notification for seller ID: " + product.getSeller().getId());
+                
+                notificationService.createNotification(
+                    product.getSeller().getId(), "SELLER", "REVIEW_ADDED",
+                    "New Review Received",
+                    String.format("Your product '%s' received a %d-star review: \"%s\" %s", 
+                        product.getName(), rating, 
+                        comment != null && !comment.trim().isEmpty() ? comment : "No comment", stars),
+                    rating >= 4 ? "NORMAL" : "HIGH",
+                    product.getId(), "PRODUCT", "/seller/products", false
+                );
+                
+                System.out.println("Review notification created successfully");
+            } else {
+                System.err.println("Cannot create review notification: Product has no seller or seller ID is null");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to create review notification: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return savedReview;
     }
 
     @Override

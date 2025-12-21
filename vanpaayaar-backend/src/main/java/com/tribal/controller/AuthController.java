@@ -7,6 +7,7 @@ import com.tribal.repository.AdminRepository;
 import com.tribal.repository.BuyerRepository;
 import com.tribal.repository.SellerRepository;
 import com.tribal.security.JwtUtil;
+import com.tribal.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +22,14 @@ public class AuthController {
     private final BuyerRepository buyerRepository;
     private final SellerRepository sellerRepository;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
 
-    public AuthController(AdminRepository adminRepository, BuyerRepository buyerRepository, SellerRepository sellerRepository, JwtUtil jwtUtil) {
+    public AuthController(AdminRepository adminRepository, BuyerRepository buyerRepository, SellerRepository sellerRepository, JwtUtil jwtUtil, NotificationService notificationService) {
         this.adminRepository = adminRepository;
         this.buyerRepository = buyerRepository;
         this.sellerRepository = sellerRepository;
         this.jwtUtil = jwtUtil;
+        this.notificationService = notificationService;
     }
 
     public static class LoginRequest {
@@ -167,6 +170,10 @@ public class AuthController {
                 .adminApprovalStatus("PENDING")
                 .build();
         seller = sellerRepository.save(seller);
+        
+        // Notify admin about new seller registration
+        notificationService.notifyAdminNewSeller(1L, seller.getId(), seller.getName());
+        
         return ResponseEntity.ok(seller);
     }
 }

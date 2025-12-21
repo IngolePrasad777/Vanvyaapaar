@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    Fab, SpeedDial, SpeedDialAction, SpeedDialIcon, 
-    Tooltip, alpha, useTheme 
+import {
+    Fab, SpeedDial, SpeedDialAction, SpeedDialIcon,
+    Tooltip, alpha, useTheme
 } from '@mui/material'
 import {
     KeyboardArrowUp, Add, ShoppingCart, Favorite,
@@ -55,7 +55,7 @@ const FloatingElements = ({
         const base = { position: 'fixed', zIndex: 1000 }
         switch (position) {
             case 'bottom-right':
-                return { ...base, bottom: 20, right: 20 }
+                return { ...base, bottom: 96, right: 24 }
             case 'bottom-left':
                 return { ...base, bottom: 20, left: 20 }
             case 'top-right':

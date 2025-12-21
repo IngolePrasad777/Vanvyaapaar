@@ -300,6 +300,8 @@ const BuyerProducts = () => {
                   whileHover={{ y: -10 }}
                 >
                   <Card
+                    component={Link}
+                    to={`/buyer/products/${product.id}`}
                     sx={{
                       borderRadius: 4,
                       border: '2px solid',
@@ -311,6 +313,9 @@ const BuyerProducts = () => {
                       height: '100%',
                       display: 'flex',
                       flexDirection: viewMode === 'list' ? 'row' : 'column',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      cursor: 'pointer',
                       '&:hover': {
                         borderColor: '#D4A574',
                         boxShadow: `0 12px 40px ${alpha('#D4A574', 0.3)}`,
@@ -347,7 +352,11 @@ const BuyerProducts = () => {
                       
                       {/* Wishlist Heart */}
                       <IconButton
-                        onClick={() => toggleWishlist(product.id)}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          toggleWishlist(product.id)
+                        }}
                         sx={{
                           position: 'absolute',
                           top: 12,
@@ -398,7 +407,11 @@ const BuyerProducts = () => {
                           fullWidth
                           variant="contained"
                           startIcon={<ShoppingCart />}
-                          onClick={() => addToCart(product.id)}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            addToCart(product.id)
+                          }}
                           sx={{
                             bgcolor: '#D4A574',
                             color: '#FFFFFF',
@@ -416,12 +429,9 @@ const BuyerProducts = () => {
                         <Box>
                           <Typography
                             variant="h6"
-                            component={Link}
-                            to={`/buyer/products/${product.id}`}
                             sx={{
                               fontWeight: 'bold',
                               color: '#1F2937',
-                              textDecoration: 'none',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: viewMode === 'grid' ? 'nowrap' : 'normal',
@@ -466,6 +476,7 @@ const BuyerProducts = () => {
                             component={Link}
                             to={`/buyer/products/${product.id}`}
                             variant="outlined"
+                            onClick={(e) => e.stopPropagation()}
                             sx={{
                               color: '#8B4513',
                               borderColor: '#D4A574',

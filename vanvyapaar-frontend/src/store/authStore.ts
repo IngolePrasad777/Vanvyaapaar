@@ -12,6 +12,7 @@ interface AuthState {
     email: string
     role: 'ADMIN' | 'BUYER' | 'SELLER'
   } | null
+  isAuthenticated: boolean
   isLoading: boolean
   login: (credentials: LoginRequest) => Promise<boolean>
   logout: () => void
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       token: null,
       user: null,
+      isAuthenticated: false,
       isLoading: false,
 
       login: async (credentials: LoginRequest) => {
@@ -62,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
             role: role as 'ADMIN' | 'BUYER' | 'SELLER'
           }
           
-          set({ token, user, isLoading: false })
+          set({ token, user, isAuthenticated: true, isLoading: false })
           toast.success(`Welcome back, ${name}!`)
           return true
         } catch (error: any) {
@@ -74,7 +76,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        set({ token: null, user: null })
+        set({ token: null, user: null, isAuthenticated: false })
         toast.success('Logged out successfully')
       },
 
@@ -112,15 +114,19 @@ export const useAuthStore = create<AuthState>()(
         const state = get()
         if (state.token && state.user) {
           // Token exists, user is logged in
+          set({ isAuthenticated: true })
           return
         }
+        // No token or user, not authenticated
+        set({ isAuthenticated: false })
       },
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({ 
         token: state.token, 
-        user: state.user 
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
       }),
     }
   )

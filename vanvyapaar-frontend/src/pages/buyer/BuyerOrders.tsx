@@ -138,12 +138,18 @@ const BuyerOrders = () => {
     }
 
     try {
-      // Here you would call the API to submit the review
-      // await buyerService.submitReview(reviewData.productId, reviewData.rating, reviewData.comment)
+      // Submit the review to the backend
+      await buyerService.addReview(
+        user!.id, 
+        reviewData.productId, 
+        reviewData.rating, 
+        reviewData.comment
+      )
       toast.success('Review submitted successfully!')
       setReviewDialogOpen(false)
       setReviewData({ productId: 0, rating: 0, comment: '' })
     } catch (error) {
+      console.error('Review submission error:', error)
       toast.error('Failed to submit review')
     }
   }

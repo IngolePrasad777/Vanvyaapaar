@@ -14,7 +14,7 @@ const LandingPage = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const products = await productService.getAllProducts()
+        const products = await productService.getPublicProducts()
         // Get featured products or first 8 products
         const featured = products.filter(p => p.featured).slice(0, 8) || products.slice(0, 8)
         setFeaturedProducts(featured)

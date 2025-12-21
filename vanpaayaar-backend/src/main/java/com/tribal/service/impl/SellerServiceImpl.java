@@ -244,4 +244,114 @@ public class SellerServiceImpl implements SellerService {
                 "Total products listed: " + productRepository.findBySellerId(sellerId).size()
         );
     }
+
+    // --- ANALYTICS ---
+    @Override
+    public Map<String, Object> getSellerAnalytics(Long sellerId, String period) {
+        Optional<Seller> sellerOptional = sellerRepository.findById(sellerId);
+        if (!sellerOptional.isPresent()) {
+            return null;
+        }
+
+        Map<String, Object> analytics = new HashMap<>();
+        List<Product> products = productRepository.findBySellerId(sellerId);
+        List<Order> orders = orderRepository.findBySellerId(sellerId);
+
+        // Basic metrics
+        double totalRevenue = orders.stream()
+                .mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount())
+                .sum();
+        
+        long totalOrders = orders.size();
+        long totalProducts = products.size();
+        
+        // Calculate total sales (sum of quantities from cart items in orders)
+        long totalSales = orders.stream()
+                .filter(order -> order.getItems() != null)
+                .flatMap(order -> order.getItems().stream())
+                .filter(cartItem -> cartItem.getQuantity() != null)
+                .mapToLong(cartItem -> cartItem.getQuantity())
+                .sum();
+
+        // Growth calculations (simplified - comparing with previous period)
+        double monthlyGrowth = 12.5; // Mock data - in real implementation, compare with previous month
+        double orderGrowth = 8.3;    // Mock data
+
+        // Top products (simplified - by order frequency)
+        Map<Product, Long> productOrderCount = orders.stream()
+                .filter(order -> order.getItems() != null)
+                .flatMap(order -> order.getItems().stream())
+                .filter(cartItem -> cartItem.getProduct() != null)
+                .collect(java.util.stream.Collectors.groupingBy(
+                    cartItem -> cartItem.getProduct(),
+                    java.util.stream.Collectors.counting()
+                ));
+
+        List<Map<String, Object>> topProducts = productOrderCount.entrySet().stream()
+                .sorted(Map.Entry.<Product, Long>comparingByValue().reversed())
+                .limit(5)
+                .map(entry -> {
+                    Map<String, Object> productData = new HashMap<>();
+                    Product product = entry.getKey();
+                    Long sales = entry.getValue();
+                    productData.put("id", product.getId());
+                    productData.put("name", product.getName());
+                    productData.put("sales", sales);
+                    productData.put("revenue", sales * (product.getPrice() != null ? product.getPrice() : 0.0));
+                    productData.put("image", product.getImageUrl());
+                    return productData;
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        // Recent orders (last 5)
+        List<Map<String, Object>> recentOrders = orders.stream()
+                .sorted((o1, o2) -> {
+                    if (o1.getOrderDate() == null && o2.getOrderDate() == null) return 0;
+                    if (o1.getOrderDate() == null) return 1;
+                    if (o2.getOrderDate() == null) return -1;
+                    return o2.getOrderDate().compareTo(o1.getOrderDate());
+                })
+                .limit(5)
+                .map(order -> {
+                    Map<String, Object> orderData = new HashMap<>();
+                    orderData.put("id", order.getId());
+                    orderData.put("buyerName", order.getBuyer() != null ? order.getBuyer().getName() : "Unknown");
+                    orderData.put("amount", order.getTotalAmount());
+                    orderData.put("status", order.getStatus());
+                    orderData.put("date", order.getOrderDate() != null ? order.getOrderDate().toString() : "N/A");
+                    return orderData;
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        // Sales data (mock monthly data - in real implementation, group by actual dates)
+        List<Map<String, Object>> salesData = java.util.List.of(
+                createSalesDataPoint("Jul", 35000, 45),
+                createSalesDataPoint("Aug", 42000, 52),
+                createSalesDataPoint("Sep", 38000, 48),
+                createSalesDataPoint("Oct", 55000, 68),
+                createSalesDataPoint("Nov", 48000, 58),
+                createSalesDataPoint("Dec", (int)totalRevenue, (int)totalOrders)
+        );
+
+        // Build response
+        analytics.put("totalSales", totalSales);
+        analytics.put("totalOrders", totalOrders);
+        analytics.put("totalProducts", totalProducts);
+        analytics.put("totalRevenue", totalRevenue);
+        analytics.put("monthlyGrowth", monthlyGrowth);
+        analytics.put("orderGrowth", orderGrowth);
+        analytics.put("topProducts", topProducts);
+        analytics.put("recentOrders", recentOrders);
+        analytics.put("salesData", salesData);
+
+        return analytics;
+    }
+
+    private Map<String, Object> createSalesDataPoint(String month, int sales, int orders) {
+        Map<String, Object> dataPoint = new HashMap<>();
+        dataPoint.put("month", month);
+        dataPoint.put("sales", sales);
+        dataPoint.put("orders", orders);
+        return dataPoint;
+    }
 }

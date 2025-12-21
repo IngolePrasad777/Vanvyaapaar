@@ -405,19 +405,19 @@ const VanMitra = () => {
             onClick={() => setIsOpen(true)}
             sx={{
               position: 'fixed',
-              bottom: 24,
-              right: location.pathname.includes('/seller') || location.pathname.includes('/buyer') ? 96 : 24,
+              bottom: { xs: 16, sm: 24 },   // 👈 lowest anchor
+              right: { xs: 16, sm: 24 },    // 👈 stick to corner
               background: 'linear-gradient(135deg, #8B4513 0%, #D4A574 50%, #A0826D 100%)',
               color: 'white',
-              width: 64,
-              height: 64,
+              width: { xs: 56, sm: 56 },
+              height: { xs: 56, sm: 56 },
               '&:hover': {
                 background: 'linear-gradient(135deg, #A0826D 0%, #C9A86A 50%, #D4A574 100%)',
                 transform: 'scale(1.1)',
                 boxShadow: '0 12px 30px rgba(139, 69, 19, 0.4)'
               },
-              zIndex: 999,
-              boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3)',
+              zIndex: 1400,
+              boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               border: '3px solid rgba(255, 255, 255, 0.2)',
               '&::before': {
@@ -427,11 +427,16 @@ const VanMitra = () => {
                 borderRadius: 'inherit',
                 background: 'linear-gradient(45deg, rgba(212, 165, 116, 0.3), rgba(139, 69, 19, 0.3))',
                 zIndex: -1
+              },
+              '@media (max-width: 600px)': {
+                bottom: 80, // still keep above mobile nav
+                right: 16
               }
             }}
           >
-            <Chat sx={{ fontSize: 28 }} />
+            <Chat sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </Fab>
+
 
 
           {/* Enhanced VanMitra label */}
@@ -476,9 +481,13 @@ const VanMitra = () => {
           paper: {
             sx: {
               width: { xs: '100%', sm: 400 },
-              height: '100%'
+              height: '100%',
+              zIndex: 1500 // Ensure drawer is above the FAB
             }
           }
+        }}
+        sx={{
+          zIndex: 1500 // Ensure drawer backdrop is properly layered
         }}
       >
         {/* Header */}

@@ -39,4 +39,7 @@ public interface SellerService {
 
     // --- MESSAGE / NOTIFICATION ---
     List<String> getSellerNotifications(Long sellerId);
+
+    // --- ANALYTICS ---
+    Map<String, Object> getSellerAnalytics(Long sellerId, String period);
 }

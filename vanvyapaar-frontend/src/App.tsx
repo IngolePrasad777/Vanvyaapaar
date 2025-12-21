@@ -27,6 +27,7 @@ import SellerDashboard from './pages/seller/SellerDashboard'
 import SellerProducts from './pages/seller/SellerProducts'
 import SellerOrders from './pages/seller/SellerOrders'
 import SellerProfile from './pages/seller/SellerProfile'
+import SellerAnalytics from './pages/seller/SellerAnalytics'
 import AddProduct from './pages/seller/AddProduct'
 import SellerNotifications from './pages/seller/SellerNotifications'
 
@@ -98,6 +99,7 @@ function App() {
         <Route path="products/add" element={<AddProduct />} />
         <Route path="products/:id" element={<ProductDetailPage />} />
         <Route path="orders" element={<SellerOrders />} />
+        <Route path="analytics" element={<SellerAnalytics />} />
         <Route path="notifications" element={<SellerNotifications />} />
         <Route path="profile" element={<SellerProfile />} />
       </Route>

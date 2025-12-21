@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/chatbot/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/payment/**").permitAll()
+                .requestMatchers("/public/**").permitAll() // Add public endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/seller/**").hasRole("SELLER")
                 .requestMatchers("/buyer/**").hasRole("BUYER")

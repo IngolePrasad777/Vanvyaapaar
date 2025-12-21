@@ -52,7 +52,7 @@ const ProductDetailPage = () => {
   const fetchProduct = async (productId: number) => {
     try {
       setLoading(true)
-      const data = await productService.getProduct(productId)
+      const data = await productService.getPublicProduct(productId)
       setProduct(data)
     } catch (error) {
       console.error('Error fetching product:', error)
@@ -63,7 +63,7 @@ const ProductDetailPage = () => {
 
   const fetchRelatedProducts = async (category: string) => {
     try {
-      const allProducts = await productService.getAllProducts()
+      const allProducts = await productService.getPublicProducts()
       const related = allProducts
         .filter(p => p.category === category && p.id !== product?.id)
         .slice(0, 4)
@@ -684,7 +684,9 @@ const ProductDetailPage = () => {
                         }
                       }}
                     >
-                      {addingToCart ? 'Adding...' : `Add to Cart • ${formatPrice(product.price * quantity)}`}
+                      {addingToCart ? 'Adding...' : 
+                       !user ? 'Login to Buy' : 
+                       `Add to Cart • ${formatPrice(product.price * quantity)}`}
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>

@@ -140,7 +140,7 @@ public class NotificationService {
             buyerId, "BUYER", ORDER_PLACED,
             "Order Placed Successfully",
             "Your order #" + orderId + " has been placed successfully. " + orderDetails,
-            "NORMAL", orderId, "ORDER", "/buyer/orders", true
+            "NORMAL", orderId, "ORDER", "/buyer/orders", true // Enable email
         );
     }
     
@@ -149,7 +149,7 @@ public class NotificationService {
             sellerId, "SELLER", ORDER_PLACED,
             "New Order Received",
             "You have received a new order #" + orderId + ". " + orderDetails,
-            "HIGH", orderId, "ORDER", "/seller/orders", true
+            "HIGH", orderId, "ORDER", "/seller/orders", true // Enable email
         );
     }
     
@@ -159,7 +159,7 @@ public class NotificationService {
             buyerId, "BUYER", "ORDER_" + status.toUpperCase(),
             title,
             "Your order #" + orderId + " has been " + status.toLowerCase() + ". " + details,
-            "NORMAL", orderId, "ORDER", "/buyer/orders", true
+            "NORMAL", orderId, "ORDER", "/buyer/orders", true // Enable email
         );
     }
     
@@ -168,7 +168,7 @@ public class NotificationService {
             sellerId, "SELLER", PRODUCT_APPROVED,
             "Product Approved",
             "Your product '" + productName + "' has been approved and is now live on the platform.",
-            "NORMAL", productId, "PRODUCT", "/seller/products", true
+            "NORMAL", productId, "PRODUCT", "/seller/products", true // Enable email
         );
     }
     
@@ -177,7 +177,7 @@ public class NotificationService {
             sellerId, "SELLER", PRODUCT_REJECTED,
             "Product Rejected",
             "Your product '" + productName + "' has been rejected. Reason: " + reason,
-            "HIGH", productId, "PRODUCT", "/seller/products", true
+            "HIGH", productId, "PRODUCT", "/seller/products", true // Enable email
         );
     }
     
@@ -186,7 +186,7 @@ public class NotificationService {
             sellerId, "SELLER", LOW_STOCK,
             "Low Stock Alert",
             "Your product '" + productName + "' is running low on stock. Current stock: " + stock,
-            "HIGH", productId, "PRODUCT", "/seller/products", true
+            "HIGH", productId, "PRODUCT", "/seller/products", true // Enable email
         );
     }
     
@@ -195,7 +195,7 @@ public class NotificationService {
             sellerId, "SELLER", ACCOUNT_APPROVED,
             "Account Approved",
             "Congratulations! Your seller account has been approved. You can now start listing products.",
-            "HIGH", sellerId, "USER", "/seller", true
+            "HIGH", sellerId, "USER", "/seller", true // Enable email
         );
     }
     
@@ -204,7 +204,7 @@ public class NotificationService {
             sellerId, "SELLER", ACCOUNT_SUSPENDED,
             "Account Suspended",
             "Your account has been suspended. Reason: " + reason + ". Please contact support for more information.",
-            "URGENT", sellerId, "USER", "/seller/profile", true
+            "URGENT", sellerId, "USER", "/seller/profile", true // Enable email
         );
     }
     
@@ -213,7 +213,7 @@ public class NotificationService {
             adminId, "ADMIN", NEW_SELLER,
             "New Seller Registration",
             "A new seller '" + sellerName + "' has registered and is awaiting approval.",
-            "NORMAL", sellerId, "USER", "/admin/sellers", false
+            "NORMAL", sellerId, "USER", "/admin/sellers", false // No email for admin notifications
         );
     }
     

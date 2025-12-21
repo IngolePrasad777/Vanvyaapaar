@@ -105,4 +105,24 @@ public class SellerController {
         if (notes == null || notes.isEmpty()) return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No notifications");
         return ResponseEntity.ok(notes);
     }
+
+    // --- Analytics ---
+    @GetMapping("/{sellerId}/analytics")
+    public ResponseEntity<?> getAnalytics(@PathVariable Long sellerId, @RequestParam(defaultValue = "month") String period) {
+        System.out.println("Analytics endpoint called for seller: " + sellerId + ", period: " + period);
+        try {
+            Map<String, Object> analytics = sellerService.getSellerAnalytics(sellerId, period);
+            if (analytics == null) {
+                System.out.println("Analytics returned null for seller: " + sellerId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Seller not found: " + sellerId);
+            }
+            System.out.println("Analytics data retrieved successfully for seller: " + sellerId);
+            System.out.println("Analytics keys: " + analytics.keySet());
+            return ResponseEntity.ok(analytics);
+        } catch (Exception e) {
+            System.err.println("Error in analytics endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving analytics: " + e.getMessage());
+        }
+    }
 }
