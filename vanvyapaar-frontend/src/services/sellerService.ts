@@ -19,9 +19,9 @@ export const sellerService = {
     return {
       totalProducts: data.totalProducts || 0,
       pendingOrders: data.pendingOrders || 0,
-      monthlySales: data.totalSales || 0, // Backend returns totalSales
+      monthlySales: data.monthlySales || 0, // Monthly sales (last 30 days) - matches analytics "month" period
       profileViews: 0, // Not implemented in backend yet
-      totalSales: data.totalSales || 0,
+      totalSales: data.totalSales || 0, // All-time total sales
       totalOrders: data.totalOrders || 0
     }
   },

@@ -526,6 +526,24 @@ const BuyerOrders = () => {
                             View Details
                           </Button>
 
+                          {['CONFIRMED', 'SHIPPED', 'DELIVERED'].includes(order.status?.toUpperCase() || '') && (
+                            <Button
+                              variant="outlined"
+                              startIcon={<LocalShipping />}
+                              onClick={() => window.open(`/delivery/track/${order.id}`, '_blank')}
+                              sx={{
+                                borderColor: '#2196F3',
+                                color: '#2196F3',
+                                '&:hover': {
+                                  bgcolor: alpha('#2196F3', 0.1),
+                                  borderColor: '#1976D2'
+                                }
+                              }}
+                            >
+                              Track Delivery
+                            </Button>
+                          )}
+
                           {order.status?.toUpperCase() === 'DELIVERED' && (
                             <Button
                               variant="contained"

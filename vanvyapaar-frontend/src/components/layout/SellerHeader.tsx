@@ -358,7 +358,7 @@ const SellerHeader = () => {
                                         borderColor: alpha('#8B4513', 0.2)
                                     }}
                                 >
-                                    {user?.name.charAt(0).toUpperCase()}
+                                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                                 </Avatar>
                                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                                     <Typography

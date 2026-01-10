@@ -38,6 +38,11 @@ import AdminBuyers from './pages/admin/AdminBuyers'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminNotifications from './pages/admin/AdminNotifications'
+import AdminDeliveryManagement from './pages/admin/AdminDeliveryManagement'
+
+// Delivery Pages
+import DeliveryTrackingPage from './pages/delivery/DeliveryTrackingPage'
+import DeliveryTest from './pages/test/DeliveryTest'
 
 // Layout Components
 import PublicLayout from './components/layout/PublicLayout'
@@ -69,6 +74,8 @@ function App() {
         <Route path="stories" element={<StoriesPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="delivery/track/:trackingId" element={<DeliveryTrackingPage />} />
+        <Route path="test/delivery" element={<DeliveryTest />} />
       </Route>
 
       {/* Buyer Routes */}
@@ -116,6 +123,7 @@ function App() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="notifications" element={<AdminNotifications />} />
+        <Route path="delivery" element={<AdminDeliveryManagement />} />
       </Route>
     </Routes>
     

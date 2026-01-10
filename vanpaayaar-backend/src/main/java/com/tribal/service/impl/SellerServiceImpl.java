@@ -224,11 +224,25 @@ public class SellerServiceImpl implements SellerService {
         List<Product> products = productRepository.findBySellerId(sellerId);
         List<Order> orders = orderRepository.findBySellerId(sellerId);
 
+        // Calculate monthly sales (last 30 days)
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime monthStart = now.minusMonths(1);
+        
+        List<Order> monthlyOrders = orders.stream()
+                .filter(order -> order.getOrderDate() != null)
+                .filter(order -> {
+                    java.time.LocalDateTime orderDate = order.getOrderDate();
+                    return orderDate.isAfter(monthStart) || orderDate.isEqual(monthStart);
+                })
+                .collect(java.util.stream.Collectors.toList());
+
         long pending = orders.stream().filter(o -> "Pending".equalsIgnoreCase(o.getStatus())).count();
-        double sales = orders.stream().mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount()).sum();
+        double totalSales = orders.stream().mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount()).sum();
+        double monthlySales = monthlyOrders.stream().mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount()).sum();
 
         data.put("totalProducts", products.size());
-        data.put("totalSales", sales);
+        data.put("totalSales", totalSales); // All-time sales
+        data.put("monthlySales", monthlySales); // Monthly sales (last 30 days)
         data.put("pendingOrders", pending);
         data.put("totalOrders", orders.size());
         return data;
@@ -257,34 +271,65 @@ public class SellerServiceImpl implements SellerService {
         List<Product> products = productRepository.findBySellerId(sellerId);
         List<Order> orders = orderRepository.findBySellerId(sellerId);
 
-        // Basic metrics
-        double totalRevenue = orders.stream()
+        // Filter orders based on time period
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime startDate = getStartDateForPeriod(period, now);
+        
+        List<Order> filteredOrders = orders.stream()
+                .filter(order -> order.getOrderDate() != null)
+                .filter(order -> {
+                    java.time.LocalDateTime orderDate = order.getOrderDate();
+                    return orderDate.isAfter(startDate) || orderDate.isEqual(startDate);
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        // Basic metrics for current period
+        double totalRevenue = filteredOrders.stream()
                 .mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount())
                 .sum();
         
-        long totalOrders = orders.size();
+        long totalOrders = filteredOrders.size();
         long totalProducts = products.size();
         
-        // Calculate total sales (sum of quantities from cart items in orders)
-        long totalSales = orders.stream()
+        // Calculate total sales (sum of quantities from cart items in filtered orders)
+        long totalSales = filteredOrders.stream()
                 .filter(order -> order.getItems() != null)
                 .flatMap(order -> order.getItems().stream())
                 .filter(cartItem -> cartItem.getQuantity() != null)
                 .mapToLong(cartItem -> cartItem.getQuantity())
                 .sum();
 
-        // Growth calculations (simplified - comparing with previous period)
-        double monthlyGrowth = 12.5; // Mock data - in real implementation, compare with previous month
-        double orderGrowth = 8.3;    // Mock data
+        // Calculate growth compared to previous period
+        java.time.LocalDateTime previousPeriodStart = getStartDateForPeriod(period, startDate);
+        List<Order> previousPeriodOrders = orders.stream()
+                .filter(order -> order.getOrderDate() != null)
+                .filter(order -> {
+                    java.time.LocalDateTime orderDate = order.getOrderDate();
+                    return orderDate.isAfter(previousPeriodStart) && orderDate.isBefore(startDate);
+                })
+                .collect(java.util.stream.Collectors.toList());
 
-        // Top products (simplified - by order frequency)
-        Map<Product, Long> productOrderCount = orders.stream()
+        double previousRevenue = previousPeriodOrders.stream()
+                .mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount())
+                .sum();
+        
+        long previousOrders = previousPeriodOrders.size();
+
+        // Calculate growth percentages
+        double monthlyGrowth = previousRevenue > 0 ? 
+                ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0.0;
+        double orderGrowth = previousOrders > 0 ? 
+                ((double)(totalOrders - previousOrders) / previousOrders) * 100 : 0.0;
+
+        // Top products (based on filtered orders)
+        Map<Product, Long> productOrderCount = filteredOrders.stream()
                 .filter(order -> order.getItems() != null)
                 .flatMap(order -> order.getItems().stream())
                 .filter(cartItem -> cartItem.getProduct() != null)
                 .collect(java.util.stream.Collectors.groupingBy(
                     cartItem -> cartItem.getProduct(),
-                    java.util.stream.Collectors.counting()
+                    java.util.stream.Collectors.summingLong(cartItem -> 
+                        cartItem.getQuantity() != null ? cartItem.getQuantity() : 0L)
                 ));
 
         List<Map<String, Object>> topProducts = productOrderCount.entrySet().stream()
@@ -303,8 +348,8 @@ public class SellerServiceImpl implements SellerService {
                 })
                 .collect(java.util.stream.Collectors.toList());
 
-        // Recent orders (last 5)
-        List<Map<String, Object>> recentOrders = orders.stream()
+        // Recent orders (last 5 from filtered orders)
+        List<Map<String, Object>> recentOrders = filteredOrders.stream()
                 .sorted((o1, o2) -> {
                     if (o1.getOrderDate() == null && o2.getOrderDate() == null) return 0;
                     if (o1.getOrderDate() == null) return 1;
@@ -323,28 +368,98 @@ public class SellerServiceImpl implements SellerService {
                 })
                 .collect(java.util.stream.Collectors.toList());
 
-        // Sales data (mock monthly data - in real implementation, group by actual dates)
-        List<Map<String, Object>> salesData = java.util.List.of(
-                createSalesDataPoint("Jul", 35000, 45),
-                createSalesDataPoint("Aug", 42000, 52),
-                createSalesDataPoint("Sep", 38000, 48),
-                createSalesDataPoint("Oct", 55000, 68),
-                createSalesDataPoint("Nov", 48000, 58),
-                createSalesDataPoint("Dec", (int)totalRevenue, (int)totalOrders)
-        );
+        // Generate real sales data based on actual orders
+        List<Map<String, Object>> salesData = generateSalesData(orders, period, now);
 
         // Build response
         analytics.put("totalSales", totalSales);
         analytics.put("totalOrders", totalOrders);
         analytics.put("totalProducts", totalProducts);
         analytics.put("totalRevenue", totalRevenue);
-        analytics.put("monthlyGrowth", monthlyGrowth);
-        analytics.put("orderGrowth", orderGrowth);
+        analytics.put("monthlyGrowth", Math.round(monthlyGrowth * 100.0) / 100.0);
+        analytics.put("orderGrowth", Math.round(orderGrowth * 100.0) / 100.0);
         analytics.put("topProducts", topProducts);
         analytics.put("recentOrders", recentOrders);
         analytics.put("salesData", salesData);
 
         return analytics;
+    }
+
+    private java.time.LocalDateTime getStartDateForPeriod(String period, java.time.LocalDateTime referenceDate) {
+        switch (period.toLowerCase()) {
+            case "week":
+                return referenceDate.minusWeeks(1);
+            case "month":
+                return referenceDate.minusMonths(1);
+            case "quarter":
+                return referenceDate.minusMonths(3);
+            case "year":
+                return referenceDate.minusYears(1);
+            default:
+                return referenceDate.minusMonths(1); // Default to month
+        }
+    }
+
+    private List<Map<String, Object>> generateSalesData(List<Order> allOrders, String period, java.time.LocalDateTime now) {
+        List<Map<String, Object>> salesData = new java.util.ArrayList<>();
+        
+        // Determine the number of data points and time unit based on period
+        int dataPoints;
+        java.time.temporal.ChronoUnit timeUnit;
+        java.time.format.DateTimeFormatter formatter;
+        
+        switch (period.toLowerCase()) {
+            case "week":
+                dataPoints = 7;
+                timeUnit = java.time.temporal.ChronoUnit.DAYS;
+                formatter = java.time.format.DateTimeFormatter.ofPattern("EEE");
+                break;
+            case "quarter":
+                dataPoints = 3;
+                timeUnit = java.time.temporal.ChronoUnit.MONTHS;
+                formatter = java.time.format.DateTimeFormatter.ofPattern("MMM");
+                break;
+            case "year":
+                dataPoints = 12;
+                timeUnit = java.time.temporal.ChronoUnit.MONTHS;
+                formatter = java.time.format.DateTimeFormatter.ofPattern("MMM");
+                break;
+            default: // month
+                dataPoints = 6;
+                timeUnit = java.time.temporal.ChronoUnit.MONTHS;
+                formatter = java.time.format.DateTimeFormatter.ofPattern("MMM");
+                break;
+        }
+
+        // Generate data points
+        for (int i = dataPoints - 1; i >= 0; i--) {
+            java.time.LocalDateTime periodStart = now.minus(i + 1, timeUnit);
+            java.time.LocalDateTime periodEnd = now.minus(i, timeUnit);
+            
+            // Filter orders for this time period
+            List<Order> periodOrders = allOrders.stream()
+                    .filter(order -> order.getOrderDate() != null)
+                    .filter(order -> {
+                        java.time.LocalDateTime orderDate = order.getOrderDate();
+                        return (orderDate.isAfter(periodStart) || orderDate.isEqual(periodStart)) && 
+                               orderDate.isBefore(periodEnd);
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            double periodRevenue = periodOrders.stream()
+                    .mapToDouble(o -> o.getTotalAmount() == null ? 0.0 : o.getTotalAmount())
+                    .sum();
+
+            String label = periodStart.format(formatter);
+            
+            Map<String, Object> dataPoint = new HashMap<>();
+            dataPoint.put("month", label);
+            dataPoint.put("sales", (int) periodRevenue);
+            dataPoint.put("orders", periodOrders.size());
+            salesData.add(dataPoint);
+        }
+
+        return salesData;
     }
 
     private Map<String, Object> createSalesDataPoint(String month, int sales, int orders) {

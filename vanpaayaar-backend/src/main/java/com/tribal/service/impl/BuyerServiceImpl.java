@@ -4,6 +4,7 @@ import com.tribal.model.*;
 import com.tribal.repository.*;
 import com.tribal.service.BuyerService;
 import com.tribal.service.NotificationService;
+import com.tribal.service.DeliveryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class BuyerServiceImpl implements BuyerService {
     private final ReviewRepository reviewRepository;
     private final WishlistRepository wishlistRepository;
     private final NotificationService notificationService;
+    private final DeliveryService deliveryService;
 
     public BuyerServiceImpl(ProductRepository productRepository,
                             BuyerRepository buyerRepository,
@@ -27,7 +29,8 @@ public class BuyerServiceImpl implements BuyerService {
                             OrderRepository orderRepository,
                             ReviewRepository reviewRepository,
                             WishlistRepository wishlistRepository,
-                            NotificationService notificationService) {
+                            NotificationService notificationService,
+                            DeliveryService deliveryService) {
         this.productRepository = productRepository;
         this.buyerRepository = buyerRepository;
         this.cartRepository = cartRepository;
@@ -35,6 +38,7 @@ public class BuyerServiceImpl implements BuyerService {
         this.wishlistRepository = wishlistRepository;
         this.orderRepository = orderRepository;
         this.notificationService = notificationService;
+        this.deliveryService = deliveryService;
     }
 
     // --------------------- Products ---------------------
@@ -148,6 +152,19 @@ public class BuyerServiceImpl implements BuyerService {
                         );
                     }
                 }
+            }
+            
+            // Create delivery for this order
+            try {
+                if (buyer.getPincode() != null && !buyer.getPincode().trim().isEmpty()) {
+                    deliveryService.createDelivery(order.getId(), buyer.getPincode());
+                    System.out.println("Delivery created for order: " + order.getId() + " to pincode: " + buyer.getPincode());
+                } else {
+                    System.err.println("Cannot create delivery: Buyer pincode is null or empty for order: " + order.getId());
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to create delivery for order " + order.getId() + ": " + e.getMessage());
+                e.printStackTrace();
             }
             
             // Create notifications for order placement

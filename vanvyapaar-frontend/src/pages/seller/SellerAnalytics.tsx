@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Box, Container, Typography, Card, CardContent, Grid, Stack,
   Button, Select, MenuItem, FormControl, InputLabel,
-  Chip, Avatar, alpha, Paper, Divider
+  Chip, Avatar, alpha, Paper
 } from '@mui/material'
 import {
   TrendingUp, ShoppingCart, Inventory, AttachMoney,
   ArrowForward, Star, LocalShipping, CheckCircle, Schedule,
-  BarChart, Analytics, Refresh, CalendarToday, People
+  BarChart, Refresh
 } from '@mui/icons-material'
 import { useAuthStore } from '../../store/authStore'
 import sellerService from '../../services/sellerService'
@@ -53,6 +52,7 @@ const SellerAnalytics = () => {
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState('month')
   const [refreshing, setRefreshing] = useState(false)
+  const [changingPeriod, setChangingPeriod] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -60,46 +60,46 @@ const SellerAnalytics = () => {
     }
   }, [user, period])
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (showPeriodLoading = false) => {
     if (!user) return
     
     try {
-      setLoading(true)
-      const data = await sellerService.getAnalytics(user.id, period)
-      
-      // Use actual API data if available, otherwise fall back to mock data
-      const analyticsData: AnalyticsData = {
-        totalSales: data?.totalSales || 45,
-        totalOrders: data?.totalOrders || 128,
-        totalProducts: data?.totalProducts || 23,
-        totalRevenue: data?.totalRevenue || 125000,
-        monthlyGrowth: data?.monthlyGrowth || 12.5,
-        orderGrowth: data?.orderGrowth || 8.3,
-        topProducts: data?.topProducts || [
-          { id: 1, name: 'Handwoven Tribal Basket', sales: 15, revenue: 22500, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100' },
-          { id: 2, name: 'Ceramic Pottery Set', sales: 12, revenue: 18000, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100' },
-          { id: 3, name: 'Wooden Sculpture', sales: 8, revenue: 12000, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100' },
-          { id: 4, name: 'Traditional Jewelry', sales: 6, revenue: 9000, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100' },
-          { id: 5, name: 'Embroidered Textiles', sales: 4, revenue: 6000, image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100' }
-        ],
-        recentOrders: data?.recentOrders || [
-          { id: 101, buyerName: 'Priya Sharma', amount: 1500, status: 'DELIVERED', date: '2024-01-15' },
-          { id: 102, buyerName: 'Raj Kumar', amount: 2200, status: 'SHIPPED', date: '2024-01-14' },
-          { id: 103, buyerName: 'Anita Singh', amount: 800, status: 'PROCESSING', date: '2024-01-13' },
-          { id: 104, buyerName: 'Vikram Patel', amount: 3200, status: 'DELIVERED', date: '2024-01-12' },
-          { id: 105, buyerName: 'Meera Gupta', amount: 1800, status: 'SHIPPED', date: '2024-01-11' }
-        ],
-        salesData: data?.salesData || [
-          { month: 'Jul', sales: 35000, orders: 45 },
-          { month: 'Aug', sales: 42000, orders: 52 },
-          { month: 'Sep', sales: 38000, orders: 48 },
-          { month: 'Oct', sales: 55000, orders: 68 },
-          { month: 'Nov', sales: 48000, orders: 58 },
-          { month: 'Dec', sales: 62000, orders: 75 }
-        ]
+      if (showPeriodLoading) {
+        setChangingPeriod(true)
+      } else {
+        setLoading(true)
       }
       
-      setAnalytics(analyticsData)
+      const data = await sellerService.getAnalytics(user.id, period)
+      
+      if (data) {
+        // Use real API data
+        const analyticsData: AnalyticsData = {
+          totalSales: data.totalSales || 0,
+          totalOrders: data.totalOrders || 0,
+          totalProducts: data.totalProducts || 0,
+          totalRevenue: data.totalRevenue || 0,
+          monthlyGrowth: data.monthlyGrowth || 0,
+          orderGrowth: data.orderGrowth || 0,
+          topProducts: Array.isArray(data.topProducts) ? data.topProducts : [],
+          recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
+          salesData: Array.isArray(data.salesData) ? data.salesData : []
+        }
+        
+        setAnalytics(analyticsData)
+        
+        if (showPeriodLoading) {
+          const periodLabels = {
+            week: 'this week',
+            month: 'this month', 
+            quarter: 'this quarter',
+            year: 'this year'
+          }
+          toast.success(`Analytics updated for ${periodLabels[period as keyof typeof periodLabels] || period}`)
+        }
+      } else {
+        throw new Error('No data received from server')
+      }
     } catch (error) {
       console.error('Error fetching analytics:', error)
       
@@ -136,10 +136,17 @@ const SellerAnalytics = () => {
       }
       
       setAnalytics(mockData)
-      toast.error('Using demo data - Analytics API will be available soon!')
+      toast.error('Failed to load analytics data. Using demo data.')
     } finally {
       setLoading(false)
+      setChangingPeriod(false)
     }
+  }
+
+  const handlePeriodChange = async (newPeriod: string) => {
+    setPeriod(newPeriod)
+    // Trigger analytics fetch with period loading indicator
+    setTimeout(() => fetchAnalytics(true), 100)
   }
 
   const handleRefresh = async () => {
@@ -188,68 +195,133 @@ const SellerAnalytics = () => {
   }
 
   return (
-    <Box sx={{ overflow: 'hidden', bgcolor: '#F5F5F4', position: 'relative' }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      bgcolor: '#F5F5F4', 
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
       <AnimatedBackground variant="geometric" intensity="light" color="#8B7355" />
       
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Stack spacing={4}>
+      <Container maxWidth="xl" sx={{ py: 6, px: { xs: 2, sm: 3, md: 4 }, position: 'relative' }}>
+        {/* Loading Overlay for Period Changes */}
+        {changingPeriod && (
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: alpha('#FFFFFF', 0.8),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(4px)'
+          }}>
+            <Stack alignItems="center" spacing={2}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <BarChart sx={{ fontSize: 48, color: '#D4A574' }} />
+              </motion.div>
+              <Typography variant="h6" sx={{ color: '#D4A574', fontWeight: 'bold' }}>
+                Updating Analytics...
+              </Typography>
+            </Stack>
+          </Box>
+        )}
+        
+        <Stack spacing={6}>
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-              <Box>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    fontFamily: 'serif',
-                    mb: 1
-                  }}
-                >
-                  Analytics Dashboard
-                </Typography>
-                <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                  Track your business performance and insights
-                </Typography>
-              </Box>
-              
-              <Stack direction="row" spacing={2}>
-                <Button
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  startIcon={<Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />}
-                  variant="outlined"
-                  sx={{
-                    borderColor: '#D4A574',
-                    color: '#8B7355',
-                    '&:hover': {
-                      borderColor: '#C9A86A',
-                      bgcolor: alpha('#D4A574', 0.1)
-                    }
-                  }}
-                >
-                  Refresh
-                </Button>
-                
-                <FormControl size="small" sx={{ minWidth: 140 }}>
-                  <InputLabel>Period</InputLabel>
-                  <Select
-                    value={period}
-                    label="Period"
-                    onChange={(e) => setPeriod(e.target.value)}
+            <Box sx={{ 
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+              p: 4,
+              border: '1px solid',
+              borderColor: alpha('#D4A574', 0.2),
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+            }}>
+              <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" spacing={3}>
+                <Box>
+                  <Typography
+                    variant="h2"
+                    sx={{
+                      fontWeight: 'bold',
+                      color: '#1F2937',
+                      fontFamily: 'serif',
+                      mb: 1,
+                      fontSize: { xs: '2rem', md: '3rem' }
+                    }}
                   >
-                    <MenuItem value="week">This Week</MenuItem>
-                    <MenuItem value="month">This Month</MenuItem>
-                    <MenuItem value="quarter">This Quarter</MenuItem>
-                    <MenuItem value="year">This Year</MenuItem>
-                  </Select>
-                </FormControl>
+                    Analytics Dashboard
+                  </Typography>
+                  <Typography variant="h6" sx={{ color: 'text.secondary', fontSize: { xs: '1rem', md: '1.25rem' } }}>
+                    Track your business performance and insights across all metrics
+                  </Typography>
+                </Box>
+                
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ minWidth: { sm: 'auto', md: '300px' } }}>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    startIcon={<Refresh sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />}
+                    variant="outlined"
+                    size="large"
+                    sx={{
+                      borderColor: '#D4A574',
+                      color: '#8B7355',
+                      px: 3,
+                      py: 1.5,
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        borderColor: '#C9A86A',
+                        bgcolor: alpha('#D4A574', 0.1)
+                      }
+                    }}
+                  >
+                    Refresh Data
+                  </Button>
+                  
+                  <FormControl size="medium" sx={{ minWidth: 160 }}>
+                    <InputLabel>Time Period</InputLabel>
+                    <Select
+                      value={period}
+                      label="Time Period"
+                      onChange={(e) => handlePeriodChange(e.target.value)}
+                      disabled={changingPeriod}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            borderColor: alpha('#D4A574', 0.3)
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#D4A574'
+                          }
+                        }
+                      }}
+                    >
+                      <MenuItem value="week">This Week</MenuItem>
+                      <MenuItem value="month">This Month</MenuItem>
+                      <MenuItem value="quarter">This Quarter</MenuItem>
+                      <MenuItem value="year">This Year</MenuItem>
+                    </Select>
+                    {changingPeriod && (
+                      <Typography variant="caption" sx={{ color: '#D4A574', mt: 0.5 }}>
+                        Updating data...
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Stack>
               </Stack>
-            </Stack>
+            </Box>
           </motion.div>
 
           {/* Stats Cards */}
@@ -258,43 +330,47 @@ const SellerAnalytics = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Grid container spacing={3}>
+            <Grid container spacing={4}>
               {[
                 {
                   title: 'Total Revenue',
                   value: formatPrice(analytics.totalRevenue),
-                  change: `+${analytics.monthlyGrowth}%`,
-                  icon: <AttachMoney sx={{ fontSize: 40 }} />,
-                  color: '#10B981'
+                  change: `${analytics.monthlyGrowth >= 0 ? '+' : ''}${analytics.monthlyGrowth.toFixed(1)}%`,
+                  icon: <AttachMoney sx={{ fontSize: 48 }} />,
+                  color: '#10B981',
+                  description: 'Total earnings this period'
                 },
                 {
                   title: 'Total Orders',
                   value: analytics.totalOrders.toString(),
-                  change: `+${analytics.orderGrowth}%`,
-                  icon: <ShoppingCart sx={{ fontSize: 40 }} />,
-                  color: '#3B82F6'
+                  change: `${analytics.orderGrowth >= 0 ? '+' : ''}${analytics.orderGrowth.toFixed(1)}%`,
+                  icon: <ShoppingCart sx={{ fontSize: 48 }} />,
+                  color: '#3B82F6',
+                  description: 'Orders received'
                 },
                 {
                   title: 'Products Sold',
                   value: analytics.totalSales.toString(),
                   change: '+15.2%',
-                  icon: <Inventory sx={{ fontSize: 40 }} />,
-                  color: '#F59E0B'
+                  icon: <Inventory sx={{ fontSize: 48 }} />,
+                  color: '#F59E0B',
+                  description: 'Items sold successfully'
                 },
                 {
                   title: 'Active Products',
                   value: analytics.totalProducts.toString(),
                   change: '+2',
-                  icon: <BarChart sx={{ fontSize: 40 }} />,
-                  color: '#8B5CF6'
+                  icon: <BarChart sx={{ fontSize: 48 }} />,
+                  color: '#8B5CF6',
+                  description: 'Products in catalog'
                 }
               ].map((stat, index) => (
-                <Grid item xs={12} sm={6} lg={3} key={index}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                    whileHover={{ y: -5 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
                   >
                     <Card
                       sx={{
@@ -302,22 +378,25 @@ const SellerAnalytics = () => {
                         border: '1px solid',
                         borderColor: alpha(stat.color, 0.15),
                         bgcolor: '#FFFFFF',
+                        height: '100%',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
                           borderColor: alpha(stat.color, 0.4),
-                          boxShadow: `0 8px 24px ${alpha(stat.color, 0.12)}`,
-                          transform: 'translateY(-4px)'
+                          boxShadow: `0 12px 32px ${alpha(stat.color, 0.15)}`,
+                          transform: 'translateY(-8px) scale(1.02)'
                         }
                       }}
                     >
-                      <CardContent sx={{ p: 3 }}>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                      <CardContent sx={{ p: 4 }}>
+                        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 3 }}>
                           <Avatar
                             sx={{
-                              width: 56,
-                              height: 56,
+                              width: 72,
+                              height: 72,
                               bgcolor: alpha(stat.color, 0.1),
-                              color: stat.color
+                              color: stat.color,
+                              border: '3px solid',
+                              borderColor: alpha(stat.color, 0.2)
                             }}
                           >
                             {stat.icon}
@@ -327,17 +406,21 @@ const SellerAnalytics = () => {
                             size="small"
                             icon={<TrendingUp />}
                             sx={{
-                              bgcolor: alpha('#10B981', 0.1),
-                              color: '#10B981',
-                              fontWeight: 'bold'
+                              bgcolor: alpha(stat.change.startsWith('+') ? '#10B981' : '#EF4444', 0.1),
+                              color: stat.change.startsWith('+') ? '#10B981' : '#EF4444',
+                              fontWeight: 'bold',
+                              fontSize: '0.8rem'
                             }}
                           />
                         </Stack>
-                        <Typography variant="h4" sx={{ fontWeight: 'bold', color: stat.color, mb: 1 }}>
+                        <Typography variant="h3" sx={{ fontWeight: 'bold', color: stat.color, mb: 1 }}>
                           {stat.value}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                        <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600, mb: 1 }}>
                           {stat.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          {stat.description}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -348,9 +431,9 @@ const SellerAnalytics = () => {
           </motion.div>
 
           {/* Charts and Data */}
-          <Grid container spacing={4}>
+          <Grid container spacing={5}>
             {/* Sales Chart */}
-            <Grid item xs={12} lg={8}>
+            <Grid size={{ xs: 12, lg: 8 }}>
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -361,55 +444,107 @@ const SellerAnalytics = () => {
                     borderRadius: 4,
                     border: '1px solid',
                     borderColor: alpha('#D4A574', 0.15),
-                    bgcolor: '#FFFFFF'
+                    bgcolor: '#FFFFFF',
+                    height: '100%'
                   }}
                 >
-                  <CardContent sx={{ p: 4 }}>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+                  <CardContent sx={{ p: 5 }}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
                       <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1F2937', mb: 0.5 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1F2937', mb: 1 }}>
                           Sales Overview
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          Monthly sales performance
+                        <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem' }}>
+                          Monthly sales performance and growth trends
                         </Typography>
                       </Box>
-                      <Chip
-                        icon={<TrendingUp />}
-                        label="Trending Up"
-                        sx={{
-                          bgcolor: alpha('#10B981', 0.1),
-                          color: '#10B981',
-                          fontWeight: 'bold'
-                        }}
-                      />
+                      <Stack direction="row" spacing={2}>
+                        <Chip
+                          icon={<TrendingUp />}
+                          label="Trending Up"
+                          sx={{
+                            bgcolor: alpha('#10B981', 0.1),
+                            color: '#10B981',
+                            fontWeight: 'bold',
+                            px: 2,
+                            py: 1
+                          }}
+                        />
+                        <Chip
+                          icon={<BarChart />}
+                          label="6 Months"
+                          sx={{
+                            bgcolor: alpha('#D4A574', 0.1),
+                            color: '#D4A574',
+                            fontWeight: 'bold',
+                            px: 2,
+                            py: 1
+                          }}
+                        />
+                      </Stack>
                     </Stack>
                     
-                    {/* Simple Bar Chart */}
-                    <Box sx={{ height: 300, display: 'flex', alignItems: 'end', gap: 2, px: 2 }}>
+                    {/* Enhanced Bar Chart */}
+                    <Box sx={{ 
+                      height: 400, 
+                      display: 'flex', 
+                      alignItems: 'end', 
+                      gap: 3, 
+                      px: 3,
+                      py: 2,
+                      background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.02) 0%, rgba(139, 115, 85, 0.02) 100%)',
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: alpha('#D4A574', 0.1)
+                    }}>
                       {analytics.salesData.map((data, index) => (
                         <Box key={index} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                           <Box
                             sx={{
                               width: '100%',
-                              maxWidth: 40,
-                              height: `${(data.sales / 70000) * 250}px`,
-                              bgcolor: '#D4A574',
-                              borderRadius: '4px 4px 0 0',
-                              mb: 1,
+                              maxWidth: 60,
+                              height: `${(data.sales / 70000) * 320}px`,
+                              background: `linear-gradient(135deg, #D4A574 0%, #C9A86A 50%, #A0826D 100%)`,
+                              borderRadius: '8px 8px 0 0',
+                              mb: 2,
+                              position: 'relative',
                               transition: 'all 0.3s',
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 12px rgba(212, 165, 116, 0.2)',
                               '&:hover': {
-                                bgcolor: '#C9A86A',
-                                transform: 'scaleY(1.05)'
+                                background: `linear-gradient(135deg, #C9A86A 0%, #D4A574 50%, #8B7355 100%)`,
+                                transform: 'scaleY(1.05) scaleX(1.1)',
+                                boxShadow: '0 8px 20px rgba(212, 165, 116, 0.3)'
+                              },
+                              '&::before': {
+                                content: `"${formatPrice(data.sales)}"`,
+                                position: 'absolute',
+                                top: -35,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                background: '#1F2937',
+                                color: 'white',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                opacity: 0,
+                                transition: 'opacity 0.3s',
+                                whiteSpace: 'nowrap'
+                              },
+                              '&:hover::before': {
+                                opacity: 1
                               }
                             }}
                           />
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
-                            {data.month}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                            {data.orders} orders
-                          </Typography>
+                          <Stack alignItems="center" spacing={0.5}>
+                            <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 'bold' }}>
+                              {data.month}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              {data.orders} orders
+                            </Typography>
+                          </Stack>
                         </Box>
                       ))}
                     </Box>
@@ -419,7 +554,7 @@ const SellerAnalytics = () => {
             </Grid>
 
             {/* Top Products */}
-            <Grid item xs={12} lg={4}>
+            <Grid size={{ xs: 12, lg: 4 }}>
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -513,7 +648,7 @@ const SellerAnalytics = () => {
             </Grid>
 
             {/* Recent Orders */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

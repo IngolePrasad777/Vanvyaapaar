@@ -383,7 +383,7 @@ const AdminHeader = () => {
                                         borderColor: alpha('#2563EB', 0.2)
                                     }}
                                 >
-                                    {user?.name.charAt(0).toUpperCase()}
+                                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                                 </Avatar>
                                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                                     <Typography

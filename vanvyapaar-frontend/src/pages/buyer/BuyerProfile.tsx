@@ -311,7 +311,7 @@ const BuyerProfile = () => {
                               boxShadow: `0 8px 25px ${alpha('#10B981', 0.3)}`
                             }}
                           >
-                            {user?.name?.[0]?.toUpperCase()}
+                            {user?.name?.[0]?.toUpperCase() || 'U'}
                           </Avatar>
                         </motion.div>
                         {editing && (

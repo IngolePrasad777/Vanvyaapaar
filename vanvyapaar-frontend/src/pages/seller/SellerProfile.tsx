@@ -295,7 +295,7 @@ const SellerProfile = () => {
                               boxShadow: `0 8px 25px ${alpha('#D4A574', 0.3)}`
                             }}
                           >
-                            {user?.name?.[0]?.toUpperCase()}
+                            {user?.name?.[0]?.toUpperCase() || 'U'}
                           </Avatar>
                         </motion.div>
                         {editing && (
