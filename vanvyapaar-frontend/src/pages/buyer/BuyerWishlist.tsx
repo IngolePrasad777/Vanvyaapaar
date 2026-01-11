@@ -7,7 +7,7 @@ import {
 } from '@mui/material'
 import {
   Favorite, ShoppingCart, Delete, FavoriteBorder,
-  Star, Visibility, ArrowForward, Category, Package,
+  Star, Visibility, ArrowForward, Category,
   Inventory
 } from '@mui/icons-material'
 import { Product } from '../../types'

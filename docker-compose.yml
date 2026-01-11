@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: prasad777
+      MYSQL_DATABASE: vanvyaapaar
+      MYSQL_USER: vanvyaapaar_user
+      MYSQL_PASSWORD: vanvyaapaar_pass
+    ports:
+      - "3307:3306"  # Keep MySQL on different port to avoid conflict
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./vanpaayaar-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # Back to original port
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vanvyaapaar?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: vanvyaapaar_user
+      SPRING_DATASOURCE_PASSWORD: vanvyaapaar_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./vanvyapaar-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Back to original port
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

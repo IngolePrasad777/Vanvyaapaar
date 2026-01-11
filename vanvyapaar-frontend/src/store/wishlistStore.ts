@@ -44,7 +44,7 @@ export const useWishlistStore = create<WishlistState>()(
             toast.success('Added to wishlist!')
           } else {
             set({ isLoading: false })
-            toast.info('Already in wishlist')
+            toast('Already in wishlist')
           }
           return true
         } catch (error: any) {

@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
 import {
-  Box, Container, Typography, Grid, Card, CardContent,
-  Avatar, Stack, Button, alpha, Paper, Divider
+  Box, Container, Typography, Grid,
+  Avatar, Stack, Button, alpha, Paper
 } from '@mui/material'
 import {
-  EmojiEvents, Handshake, Security, LocalShipping,
-  Verified, AutoAwesome, Diamond, Star,
+  EmojiEvents, Handshake,
+  AutoAwesome, Diamond,
   People, TrendingUp, Favorite, Shield
 } from '@mui/icons-material'
 import AnimatedBackground from '../../components/common/AnimatedBackground'
@@ -193,7 +193,7 @@ const AboutPage = () => {
         <Box sx={{ mb: 12 }}>
           <Grid container spacing={4}>
             {stats.map((stat, index) => (
-              <Grid item xs={6} md={3} key={index}>
+              <Grid size={{ xs: 6, md: 3 }} key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -263,7 +263,7 @@ const AboutPage = () => {
           </Typography>
           <Grid container spacing={4}>
             {values.map((value, index) => (
-              <Grid item xs={12} md={6} key={index}>
+              <Grid size={{ xs: 12, md: 6 }} key={index}>
                 <motion.div
                   initial={{ opacity: 0, x: index % 2 === 0 ? -40 : 40 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -303,7 +303,7 @@ const AboutPage = () => {
           </Typography>
           <Grid container spacing={4}>
             {team.map((member, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}

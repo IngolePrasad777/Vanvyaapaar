@@ -23,7 +23,7 @@ interface NotificationState {
   stopPolling: () => void
 }
 
-let pollingInterval: NodeJS.Timeout | null = null
+let pollingInterval: number | null = null
 
 export const useNotificationStore = create<NotificationState>()(
   persist(

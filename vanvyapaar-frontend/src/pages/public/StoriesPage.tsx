@@ -199,7 +199,7 @@ const StoriesPage = () => {
         <Box id="featured" sx={{ mb: 8 }}>
           <Grid container spacing={4}>
             {filteredStories.map((story, index) => (
-              <Grid item xs={12} md={6} key={story.id}>
+              <Grid size={{ xs: 12, md: 6 }} key={story.id}>
                 <motion.div
                   initial={{ opacity: 0, y: 60 }}
                   whileInView={{ opacity: 1, y: 0 }}

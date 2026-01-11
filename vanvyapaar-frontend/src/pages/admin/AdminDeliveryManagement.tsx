@@ -200,7 +200,7 @@ const AdminDeliveryManagement: React.FC = () => {
       {/* Analytics Cards */}
       {analytics && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ background: 'linear-gradient(135deg, #D4A574 0%, #8B7355 100%)' }}>
               <CardContent sx={{ color: 'white' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -216,7 +216,7 @@ const AdminDeliveryManagement: React.FC = () => {
             </Card>
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' }}>
               <CardContent sx={{ color: 'white' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -232,7 +232,7 @@ const AdminDeliveryManagement: React.FC = () => {
             </Card>
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' }}>
               <CardContent sx={{ color: 'white' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -248,7 +248,7 @@ const AdminDeliveryManagement: React.FC = () => {
             </Card>
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' }}>
               <CardContent sx={{ color: 'white' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

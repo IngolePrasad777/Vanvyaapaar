@@ -170,7 +170,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {getStatusIcon(delivery.status)}
                     <Box sx={{ ml: 2 }}>
@@ -197,7 +197,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
                   />
                 </Grid>
                 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
                     <Typography variant="body2" color="text.secondary">
                       Estimated Delivery
@@ -230,7 +230,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
                   Delivery Agent
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Avatar sx={{ bgcolor: '#D4A574', mr: 2 }}>
                         {delivery.agent.name.charAt(0)}
@@ -243,7 +243,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
                       </Box>
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Phone sx={{ mr: 1, color: 'text.secondary' }} />
                       <Typography variant="body2">{delivery.agent.phone}</Typography>
@@ -297,7 +297,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
                 Delivery Details
               </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                     <LocationOn sx={{ mr: 1, mt: 0.5, color: 'text.secondary' }} />
                     <Box>
@@ -313,7 +313,7 @@ const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                     <LocationOn sx={{ mr: 1, mt: 0.5, color: 'primary.main' }} />
                     <Box>

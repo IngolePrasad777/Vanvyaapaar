@@ -210,7 +210,7 @@ const AgentDashboard: React.FC = () => {
         <Card sx={{ mb: 3, borderRadius: 3 }}>
           <CardContent>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar sx={{ bgcolor: '#D4A574', width: 60, height: 60, mr: 2 }}>
                     {agent.name.charAt(0)}
@@ -230,7 +230,7 @@ const AgentDashboard: React.FC = () => {
                 </Box>
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={1}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Phone sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
@@ -249,7 +249,7 @@ const AgentDashboard: React.FC = () => {
                 </Stack>
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Box sx={{ textAlign: 'right' }}>
                   <FormControlLabel
                     control={
