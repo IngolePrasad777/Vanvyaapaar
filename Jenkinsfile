@@ -48,7 +48,7 @@ pipeline {
                     -v $KUBECONFIG:/root/.kube/config \
                     -v $(pwd):/workspace \
                     -w /workspace \
-                    bitnami/kubectl apply -f k8s/
+                    lachlanevenson/k8s-kubectl apply -f k8s/
                     '''
                 }
             }
