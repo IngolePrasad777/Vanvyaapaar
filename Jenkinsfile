@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "ingoleprasad777/vanvyaapaar-all-in-one" // lowercase is safer
+        IMAGE_NAME = "samikshamulik22/vanvyaapaar-all-in-one" // lowercase is safer
         IMAGE_TAG = "v2.0"
     }
 
