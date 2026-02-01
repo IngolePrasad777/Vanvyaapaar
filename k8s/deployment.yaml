@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vanvyaapaar-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vanvyaapaar
+  template:
+    metadata:
+      labels:
+        app: vanvyaapaar
+    spec:
+      containers:
+        - name: vanvyaapaar
+          image: ingoleprasad777/vanvyaapaar-all-in-one:v2.0
+          ports:
+            - containerPort: 3000
+            - containerPort: 8081
+
+
+
+
+
+
+
+# kubectl apply -f deployments/nginx-deployment.yaml
+# kubectl get deployments
+# kubectl get replicasets
+# kubectl get pods
+# kubectl describe deployment nginx-deployment
+
+
+  
+# docker pull ingoleprasad777/vanvyaapaar:latest
+# docker run -p 3000:3000 -p 8080:8080 --add-host=host.docker.internal:host-gateway ingoleprasad777/vanvyaapaar:latest
