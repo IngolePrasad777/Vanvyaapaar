@@ -44,11 +44,9 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'abcd', variable: 'KUBECONFIG')]) {
                     sh '''
-                    docker run --rm \
-                    -v $KUBECONFIG:/root/.kube/config \
-                    -v $(pwd):/workspace \
-                    -w /workspace \
-                    lachlanevenson/k8s-kubectl apply -f k8s/
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl apply -f k8s/
+                    kubectl rollout status deployment/vanvyaapaar
                     '''
                 }
             }
