@@ -39,6 +39,20 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'abcd', variable: 'KUBECONFIG')]) {
+                    sh '''
+                    docker run --rm \
+                    -v $KUBECONFIG:/root/.kube/config \
+                    -v $(pwd):/workspace \
+                    -w /workspace \
+                    bitnami/kubectl apply -f k8s/
+                    '''
+                }
+            }
+        }
     }
 
     post {

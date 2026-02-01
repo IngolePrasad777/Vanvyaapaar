@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: vanvyaapaar
-          image: ingoleprasad777/vanvyaapaar-all-in-one:v2.0
+          image: samikshamulik22/vanvyaapaar-all-in-one:v2.0
           ports:
             - containerPort: 3000
             - containerPort: 8081
